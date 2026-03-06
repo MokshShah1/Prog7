@@ -1,28 +1,14 @@
+HW7 - TDMM (Memory Allocator)
+Name: Moksh Shah
+EID: mps2965
 
-**Name:** Moksh Shah  
-**EID:** mps2965  
-
-
-This project implements a custom memory allocator (`t_malloc`, `t_free`) with multiple allocation strategies:
-
-- **First Fit**  
-- **Best Fit**  
-- **Worst Fit**  
-- **Buddy Allocation**  
-- **Mixed (Round-Robin: First → Best → Worst)**  
-
-The allocator manages memory in a contiguous heap and supports:
-
-- Block splitting  
-- Block merging (coalescing)  
-- Alignment to 4 bytes  
-- Peak memory usage tracking  
-- Requesting memory from the OS using `mmap`  
-
-The `main.c` benchmark evaluates all strategies for performance and memory utilization.
-
-
-Run the following command to build the project:
-
-```bash
+Build:
 bash build.sh
+
+Run:
+./build/hw7
+
+Notes:
+
+- libtdmm.a is built for the autograder.
+- mftester.c will be linked internally by Gradescope.
