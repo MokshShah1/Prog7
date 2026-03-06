@@ -1,5 +1,4 @@
 #include "tdmm.h"
-
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -32,7 +31,7 @@ static size_t peak_bytes_in_use = 0;
 // For MIXED strategy
 static int mixed_counter = 0;
 
-// Helper to round up to nearest multiple
+// Helper to round up
 static size_t round_up(size_t value, size_t multiple)
 {
 	if (multiple == 0)
@@ -160,7 +159,7 @@ static heap_block_t *pick_block(size_t needed_bytes)
 	heap_block_t *chosen = NULL;
 	alloc_strat_e strat = active_strategy;
 
-	// For MIXED strategy
+	// MIXED strategy
 	if (strat == MIXED)
 	{
 		int mod = mixed_counter % 3;
@@ -217,7 +216,6 @@ static void split_if_useful(heap_block_t *block, size_t needed_bytes)
 }
 
 // PUBLIC FUNCTIONS
-
 void t_init(alloc_strat_e strat)
 {
 	active_strategy = strat;
@@ -235,6 +233,7 @@ void *t_malloc(size_t size)
 		return NULL;
 	size_t needed_bytes = round_up(size, alignment_bytes);
 	heap_block_t *block = pick_block(needed_bytes);
+
 	if (!block)
 	{
 		request_more_memory(needed_bytes);
