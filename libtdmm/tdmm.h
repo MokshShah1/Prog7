@@ -14,7 +14,7 @@ typedef enum
 
 size_t tdmm_bytes_free_payload(void);
 
-void t_init(alloc_strat_e strat);
+void t_init(alloc_strat_e strategy);
 
 void *t_malloc(size_t bytes);
 

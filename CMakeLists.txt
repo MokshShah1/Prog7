@@ -3,9 +3,7 @@ project(hw7 C)
 
 set(CMAKE_C_STANDARD 99)
 
-# Add tdmm library from libtdmm folder
 add_subdirectory(libtdmm)
 
-# Add main executable
 add_executable(hw7 main.c)
 target_link_libraries(hw7 tdmm)
