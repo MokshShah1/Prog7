@@ -1,0 +1,16 @@
+strategy,size_label,size_bytes,avg_malloc_ns,avg_free_ns
+first_fit,1B,1,63.6,47.2
+first_fit,4KB,4096,46.5,58.6
+first_fit,8MB,8388608,61.4,32.0
+best_fit,1B,1,33.4,122.1
+best_fit,4KB,4096,40.5,32.0
+best_fit,8MB,8388608,41.1,32.1
+worst_fit,1B,1,32.3,32.0
+worst_fit,4KB,4096,33.6,38.2
+worst_fit,8MB,8388608,113.7,32.0
+buddy,1B,1,42.8,32.2
+buddy,4KB,4096,34.7,39.4
+buddy,8MB,8388608,42.0,32.1
+mixed,1B,1,33.1,32.0
+mixed,4KB,4096,34.5,39.2
+mixed,8MB,8388608,35.4,39.0

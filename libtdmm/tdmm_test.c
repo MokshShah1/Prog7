@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 
 static uint64_t get_time_nanos(void)
 {
@@ -125,13 +126,18 @@ static int run_unit_tests(void)
 static void write_utilization_csv(alloc_strat_e strategy)
 {
     const int request_count = 5000;
-    static void *allocated_ptrs[request_count];
-    static uint32_t allocation_sizes[request_count];
+
+    void **allocated_ptrs = malloc(sizeof(void *) * request_count);
+    uint32_t *allocation_sizes = malloc(sizeof(uint32_t) * request_count);
+    if (!allocated_ptrs || !allocation_sizes)
+    {
+        printf("[util] malloc failed\n");
+        return;
+    }
 
     uint32_t rng_state;
     FILE *csv_file;
     char file_path[128];
-
     int i;
 
     for (i = 0; i < request_count; i++)
@@ -147,6 +153,8 @@ static void write_utilization_csv(alloc_strat_e strategy)
     if (csv_file == NULL)
     {
         printf("[util] could not open %s\n", file_path);
+        free(allocated_ptrs);
+        free(allocation_sizes);
         return;
     }
 
@@ -223,7 +231,76 @@ static void write_utilization_csv(alloc_strat_e strategy)
 
     fclose(csv_file);
 
+    free(allocated_ptrs);
+    free(allocation_sizes);
+
     printf("[util] wrote %s\n", file_path);
+}
+
+static void run_speed_benchmark(void)
+{
+    static const size_t test_sizes[] = {1, 4096, 8388608};
+    static const char *size_labels[] = {"1B", "4KB", "8MB"};
+    static const int num_sizes = 3;
+
+    static const alloc_strat_e strategies[] = {
+        FIRST_FIT, BEST_FIT, WORST_FIT, BUDDY, MIXED};
+    static const int num_strategies = 5;
+
+    const int iterations = 1000;
+
+    FILE *csv = fopen("speed_results.csv", "w");
+    if (csv == NULL)
+    {
+        printf("[speed] could not open speed_results.csv\n");
+        return;
+    }
+
+    fprintf(csv, "strategy,size_label,size_bytes,avg_malloc_ns,avg_free_ns\n");
+
+    int s, z, iter;
+    for (s = 0; s < num_strategies; s++)
+    {
+        for (z = 0; z < num_sizes; z++)
+        {
+            t_init(strategies[s]);
+
+            uint64_t total_malloc_ns = 0;
+            uint64_t total_free_ns = 0;
+
+            for (iter = 0; iter < iterations; iter++)
+            {
+                uint64_t t0 = get_time_nanos();
+                void *p = t_malloc(test_sizes[z]);
+                uint64_t t1 = get_time_nanos();
+
+                t_free(p);
+                uint64_t t2 = get_time_nanos();
+
+                total_malloc_ns += (t1 - t0);
+                total_free_ns += (t2 - t1);
+            }
+
+            double avg_malloc = (double)total_malloc_ns / (double)iterations;
+            double avg_free = (double)total_free_ns / (double)iterations;
+
+            fprintf(csv, "%s,%s,%zu,%.1f,%.1f\n",
+                    get_strategy_label(strategies[s]),
+                    size_labels[z],
+                    test_sizes[z],
+                    avg_malloc,
+                    avg_free);
+
+            printf("[speed] %s @ %s : malloc %.1f ns, free %.1f ns\n",
+                   get_strategy_label(strategies[s]),
+                   size_labels[z],
+                   avg_malloc,
+                   avg_free);
+        }
+    }
+
+    fclose(csv);
+    printf("[speed] wrote speed_results.csv\n");
 }
 
 int main(void)
@@ -236,6 +313,9 @@ int main(void)
     write_utilization_csv(BEST_FIT);
     write_utilization_csv(WORST_FIT);
     write_utilization_csv(MIXED);
+    write_utilization_csv(BUDDY);
+
+    run_speed_benchmark();
 
     if (test_result != 0)
     {
